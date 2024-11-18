@@ -27,4 +27,5 @@ neuro_mf
 optuna
 scipy
 statsmodels
+"pymongo[srv]"==3.11
 -e .

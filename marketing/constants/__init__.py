@@ -12,7 +12,14 @@ MODEL_CONFIG_FILE = "config/model.yaml"
 PARAM_FILE_PATH = "params.yaml"
 SCHEMA_FILE_PATH = "config/schema.yaml"
 
-SOURCE_URL = "https://github.com/donadviser/datasets/raw/master/data-don/marketing_campaign.zip"
+
+# Source Data and MongoDB configuration
+MONGODB_DB_NAME: str = "marketing_campaign"
+MONGODB_COLLECTION_NAME: str = "customer_segmentation"
+MONGODB_URL_KEY = environ.get["MOGODB_MARKETING_URL"]
+
+# GitHub DataSource
+GITHUB_SOURCE_URL = "https://github.com/donadviser/datasets/raw/master/data-don/marketing_campaign.zip"
 
 
 TARGET_COLUMN = "cluster"
@@ -25,7 +32,7 @@ ARTEFACTS_ROOT_DIR = os.path.join(from_root(), "artefacts")
 
 # common file name
 
-FILE_NAME: str = "customer.csv"
+FILE_NAME: str = "marketing_campaign.csv"
 TRAIN_FILE_NAME: str = "train.csv"
 TEST_FILE_NAME: str = "test.csv"
 PREPROCSSING_OBJECT_FILE_NAME = "preprocessing.pkl"
@@ -35,7 +42,7 @@ MODEL_FILE_NAME = "model.pkl"
 """
 Data Ingestion related constant start with DATA_INGESTION VAR NAME
 """
-DATA_INGESTION_COLLECTION_NAME: str = ""
+DATA_INGESTION_COLLECTION_NAME: str = MONGODB_COLLECTION_NAME
 DATA_INGESTION_DIR_NAME: str = "data_ingestion"
 DATA_INGESTION_FEATURE_STORE_DIR: str = "feature_store"
 DATA_INGESTION_INGESTED_DIR: str = "ingested"
