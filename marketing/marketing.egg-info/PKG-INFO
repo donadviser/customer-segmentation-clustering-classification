@@ -1,0 +1,19 @@
+Metadata-Version: 2.1
+Name: marketing
+Version: 0.0.0
+Summary: A production-grade machine learning clustering and classification microservices
+Home-page: https://github.com/donadviser/marketing
+Author: donadviser
+Author-email: donadviser@gmail.com
+Project-URL: Bug Tracker, https://github.com/{AUTHOR_USER_NAME}/{REPO_NAME}/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Intended Audience :: Developers
+Classifier: Natural Language :: English
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+
+# Customer-Segmentation-Clustering-Classification
