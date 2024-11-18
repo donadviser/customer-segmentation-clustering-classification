@@ -163,7 +163,7 @@ cython_debug/
 
 
 # user defined
-artefacts/
+artifact/
 catboost*/*
 logs/
 research/catboost_info/

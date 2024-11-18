@@ -4,7 +4,7 @@ from os import environ
 from datetime import datetime
 from from_root import from_root
 
-TIMESTAMP: str = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+TIMESTAMP: str = datetime.now().strftime("%Y%m%d_%H%M%S")
 CURRENT_YEAR =  datetime.now().year
 
 # Configuration file
@@ -16,7 +16,7 @@ SCHEMA_FILE_PATH = "config/schema.yaml"
 # Source Data and MongoDB configuration
 MONGODB_DB_NAME: str = "marketing_campaign"
 MONGODB_COLLECTION_NAME: str = "customer_segmentation"
-MONGODB_URL_KEY = environ.get["MOGODB_MARKETING_URL"]
+MONGODB_URL_KEY = environ["MONGODB_MARKETING_URL"]
 
 # GitHub DataSource
 GITHUB_SOURCE_URL = "https://github.com/donadviser/datasets/raw/master/data-don/marketing_campaign.zip"
