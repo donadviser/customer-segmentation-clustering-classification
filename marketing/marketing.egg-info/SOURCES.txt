@@ -1,5 +1,8 @@
+LICENSE
 README.md
 setup.py
+marketing/cloud_storage/__init__.py
+marketing/cloud_storage/mongodb_data.py
 marketing/components/__init__.py
 marketing/components/data_ingestion.py
 marketing/components/data_transformation.py
@@ -8,6 +11,7 @@ marketing/components/model_evaluation.py
 marketing/components/model_pusher.py
 marketing/components/model_trainer.py
 marketing/configuration/__init__.py
+marketing/configuration/mongodb_connection.py
 marketing/constants/__init__.py
 marketing/entity/__init__.py
 marketing/entity/artifact_entity.py

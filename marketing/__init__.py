@@ -1,18 +1,27 @@
 import os
 import sys
 import logging
+from from_root import from_root
+from marketing.constants import ARTIFACT_DIR, LOG_DIR, LOG_FILE, PIPELINE_NAME, TIMESTAMP
 
-logging_str = "[%(asctime)s: %(levelname)s: %(module)s: %(lineno)d %(message)s]"
-log_dir = "logs"
-log_filepath = os.path.join(log_dir,"running_logs.log")
-os.makedirs(log_dir, exist_ok=True)
+logging_str = "[%(asctime)s: %(name)s: %(levelname)s: %(funcName)s: %(lineno)d: %(message)s]"
+
+logs_path = os.path.join(from_root(), ARTIFACT_DIR, TIMESTAMP, LOG_DIR)
+print(f"logs_path: {logs_path}")
+os.makedirs(logs_path, exist_ok=True)
+log_file_path = os.path.join(logs_path, LOG_FILE)
+print(f"log_file_path: {log_file_path}")
+
+#log_dir = "logs"
+#log_filepath = os.path.join(log_dir,"running_logs.log")
+#os.makedirs(log_dir, exist_ok=True)
 
 logging.basicConfig(
     level= logging.INFO,
     format= logging_str,
 
     handlers=[
-        logging.FileHandler(log_filepath),
+        logging.FileHandler(log_file_path),
         logging.StreamHandler(sys.stdout)
     ]
 )

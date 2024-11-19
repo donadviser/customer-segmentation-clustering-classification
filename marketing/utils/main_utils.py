@@ -17,8 +17,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.utils import all_estimators
 
-from insurance import logging, CustomException
-from insurance.constants import *
+from marketing import logging, CustomException
+from marketing.constants import *
 
 import os
 import joblib
@@ -37,11 +37,15 @@ class MainUtils:
         except Exception as e:
             raise CustomException(e, sys)
 
-    def write_json_to_yaml(self, json_file: Dict,  yaml_file_path: str) -> yaml:
+    def write_json_to_yaml(self, json_file: Dict,  yaml_file_path: str, replace:bool=False) -> yaml:
         logging.info("Entered the write_json_to_yaml method of MainUtils class.")
         try:
-            with open(yaml_file_path, "w") as yaml_file:
-                safe_dump(json_file, yaml_file, default_flow_style=False)
+            if replace:
+                if os.path.exists(yaml_file_path):
+                    os.remove(yaml_file_path)
+            os.makedirs(os.path.dirname(yaml_file_path), exist_ok=True)
+            with open(yaml_file_path, "w") as file:
+                yaml.dump(json_file, file)
             logging.info(f"Successfully saved the json data to {yaml_file_path}")
         except Exception as e:
             raise CustomException(e, sys)
