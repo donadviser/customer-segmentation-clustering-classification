@@ -167,6 +167,8 @@ class MainUtils:
     @staticmethod
     def save_object(file_path: str, obj: object) -> None:
         logging.info("Entered the save_object method of MainUtils class")
+        dir_path = os.path.dirname(file_path)
+        os.makedirs(dir_path, exist_ok=True)
         try:
             with open(file_path, "wb") as file_obj:
                 dill.dump(obj, file_obj)

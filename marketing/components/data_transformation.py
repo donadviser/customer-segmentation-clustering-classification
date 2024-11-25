@@ -13,6 +13,7 @@ from marketing.entity.artifact_entity import (
     DataTransformationArtifact,
 )
 from marketing.components.data_ingestion import DataIngestion
+from marketing.components.data_clustering import CreateClusters
 
 
 from marketing import logging
@@ -326,13 +327,21 @@ class DataTransformation:
                     self.data_transformation_config.transformed_object_file_path,
                     preprocessor,
                 )
-                transformed_train_file_path = self.main_utils.save_numpy_array_data(
+
+                #create clusters
+                create_clusters = CreateClusters(self.target_column)
+                data_train_labelled = create_clusters.initialise_clustering(X_train_transformed_df)
+                data_test_labelled = create_clusters.initialise_clustering(X_test_transformed_df)
+                logging.info("Created clusters for target column")
+                logging.info(f"data_train_labelled.head(): {data_train_labelled.head()}")
+
+                transformed_train_file_path = self.main_utils.save_object(
                     self.data_transformation_config.transformed_train_file_path,
-                    X_train_transformed_df,
+                    data_train_labelled,
                 )
-                transformed_test_file_path = self.main_utils.save_numpy_array_data(
+                transformed_test_file_path = self.main_utils.save_object(
                     self.data_transformation_config.transformed_test_file_path,
-                    X_test_transformed_df,
+                    data_test_labelled,
                 )
 
                 data_trasformation_artifact = DataTransformationArtifact(
