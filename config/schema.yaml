@@ -66,3 +66,70 @@ numerical_columns:
   - Response
 
 # Features used for the training pipeline
+
+categorical_features:
+  - education
+  - complain
+  - response
+  - family_size
+  - offers_responded_to
+  - parental_status
+
+
+outlier_features:
+  - income
+  - mnt_meat_products
+  - num_deals_purchases
+  - num_web_purchases
+  - num_catalog_purchases
+  - num_web_visits_month
+  - total_spending
+
+
+numerical_features:
+  - recency
+  - mnt_wines
+  - mnt_fruits
+  - mnt_fish_products
+  - mnt_sweet_products
+  - mnt_gold_prods
+  - num_store_purchases
+  - age
+  - days_as_customer
+
+
+drop_columns:
+  - i_d
+  - kidhome
+  - teenhome
+  - marital_status
+  - year_birth
+  - dt_customer
+  - z_cost_contact
+  - z_revenue
+  - total_promo
+  - children
+  - accepted_cmp1
+  - accepted_cmp2
+  - accepted_cmp3
+  - accepted_cmp4
+  - accepted_cmp5
+
+education_map:
+  Basic: 0
+  2n Cycle: 1
+  Graduation: 2
+  Master: 3
+  PhD: 4
+
+marital_map:
+  Married: 1
+  Together: 1
+  Absurd: 0
+  Widow: 0
+  YOLO: 0
+  Divorced: 0
+  Single: 0
+  Alone: 0
+
+target_column: cluster

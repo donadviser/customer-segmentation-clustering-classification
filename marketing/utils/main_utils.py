@@ -53,6 +53,8 @@ class MainUtils:
     def save_numpy_array_data(self, file_path: str, array: np.array) -> None:
         logging.info("Entered the save_numpy_array_data method of MainUtils class.")
         try:
+            dir_path = os.path.dirname(file_path)
+            os.makedirs(dir_path, exist_ok=True)
             with open(file_path, "wb") as file_obj:
                 np.save(file_obj, array)
             logging.info(f"Successfully saved the numpy array data to {file_path}")
@@ -297,3 +299,21 @@ class MainUtils:
         """
         size_in_kb = round(os.path.getsize(path)/1024)
         return f"~ {size_in_kb} KB"
+
+
+    @staticmethod
+    def read_csv_file(file_path: str) -> pd.DataFrame:
+        """read csv file
+
+        Args:
+            file_path (str): file path
+
+        Returns:
+            pd.DataFrame: loaded DataFrame
+        """
+        try:
+            df = pd.read_csv(file_path)
+            logging.info(f"CSV file loaded from: {file_path}")
+            return df
+        except Exception as e:
+            raise CustomException(e, sys)

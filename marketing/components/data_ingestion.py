@@ -58,6 +58,8 @@ class DataIngestion:
 
         Args:
             df (pd.DataFrame): Input dataframe
+
+        Constants:
             test_size (float, optional): The proportion of the dataset to include in the test split. Defaults to 0.2.
             random_state (int, optional): The seed for the random number generator. Defaults to 42.
             shuffle (bool, optional): Whether or not to shuffle the data before splitting. Defaults to True.
