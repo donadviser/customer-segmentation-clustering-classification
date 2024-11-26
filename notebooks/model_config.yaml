@@ -4,7 +4,7 @@ study:
 
 cross_validation:
   CV: 5
-  scoring: "f1"
+  scoring: accuracy
   random_state: 42
 
 
@@ -27,7 +27,7 @@ models:
   RandomForestClassifier:
     module: sklearn.ensemble
     class: RandomForestClassifier
-    short_name: RandomForest
+    short_name: RandomForest 
     parameters:
       n_estimators:
         type: int
@@ -45,21 +45,3 @@ models:
         type: int
         min: 1
         max: 20
-  DecisionTreeClassifier:
-    module: sklearn.tree
-    class: DecisionTreeClassifier
-    short_name: DecisionTree
-    parameters:
-      max_depth:
-        type: int
-        min: 2
-        max: 30
-      min_samples_split:
-        type: int
-        min: 2
-        max: 20
-      min_samples_leaf:
-        type: int
-        min: 1
-        max: 20
-

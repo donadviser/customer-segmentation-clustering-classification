@@ -126,7 +126,7 @@ class PreprocessingPipeline:
         self.add_step('create_new_features', self.build(step_name='create_new_features'), position=0)
         self.add_step('drop_cols', self.build(step_name='drop_cols'), position=1)
         self.add_step('column_transformer', self.build(step_name='column_transformer'), position=2)
-        self.add_step('scalar', StandardScaler(), position=3)
+        self.add_step('scalar', RobustScaler(), position=3)
 
         return self.pipeline
 

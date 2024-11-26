@@ -4,17 +4,19 @@ from marketing import CustomException
 from marketing.components.data_ingestion import DataIngestion
 from marketing.components.data_validation import DataValidation
 from marketing.components.data_transformation import DataTransformation
+from marketing.components.model_trainer import ModelTrainer
 
 from marketing.entity.config_entity import (
     DataIngestionConfig,
     DataValidationConfig,
     DataTransformationConfig,
+    ModelTrainerConfig,
     )
 from marketing.entity.artifact_entity import (
     DataIngestionArtifact,
     DataValidationArtifact,
     DataTransformationArtifact,
-
+    ModelTrainerArtifact,
 )
 
 
@@ -23,6 +25,7 @@ class TrainPipeline:
         self.data_ingestion_config = DataIngestionConfig()
         self.data_validation_config = DataValidationConfig()
         self.data_transformation_config = DataTransformationConfig()
+        self.model_trainer_config = ModelTrainerConfig()
 
 
     @staticmethod
@@ -96,6 +99,23 @@ class TrainPipeline:
         except Exception as e:
                 self._handle_exception(e)
 
+
+    def start_model_trainer(self, data_transformation_artifact: DataTransformationArtifact) -> ModelTrainerArtifact:
+        logging.info("Entered the start_model_trainer method of TrainPipeline class")
+        try:
+            logging.info("Initializing ModelTrainer component")
+            model_trainer = ModelTrainer(data_transformation_artifact=data_transformation_artifact,
+                                            model_trainer_config=self.model_trainer_config)
+
+            logging.info("Initiating model training")
+            model_trainer_artifact = model_trainer.initiate_model_trainer()
+
+            logging.info("Model training completed successfully")
+            logging.info("Exited the start_model_trainer method of TrainPipeline class")
+            return model_trainer_artifact
+        except Exception as e:
+            self._handle_exception(e)
+
     def run_pipeline(self,) -> None:
         """
         Run the entire data ingestion, preprocessing, and model training pipeline.
@@ -112,7 +132,11 @@ class TrainPipeline:
                 data_validation_artifact=data_validation_artifact
                 )
 
-            logging.info("Data ingestion completed successfully")
+            model_trainer_artifact = self.start_model_trainer(
+                data_transformation_artifact=data_transformation_artifact
+                )
+
+            logging.info("Data run_pipeline method of TrainPipeline class")
 
         except Exception as e:
             self._handle_exception(e)
