@@ -62,4 +62,7 @@ models:
         type: int
         min: 1
         max: 20
-
+#  LogisticRegression:
+#    module: sklearn.linear_model
+#    class: LogisticRegression
+#    short_name: LR

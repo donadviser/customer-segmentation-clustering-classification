@@ -160,7 +160,7 @@ class PreprocessingPipeline:
                     ('categorical', Pipeline([
                         ('imputer', self.instantiate_categorical_simple_imputer(strategy=categorical_strategy)),
                         #('onehot', OneHotEncoder(handle_unknown='ignore', drop='first', sparse_output=False))
-                        #('ordinal', OrdinalEncoder())
+                        ('ordinal', OrdinalEncoder())
                     ]), self.categorical_features),
 
                     ('numerical', Pipeline([

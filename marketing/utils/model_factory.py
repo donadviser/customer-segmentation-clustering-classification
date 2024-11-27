@@ -1,6 +1,6 @@
 import optuna
 import yaml
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, StratifiedKFold
 from importlib import import_module
 from collections import namedtuple
 from datetime import datetime
@@ -77,46 +77,43 @@ class ModelFactory:
         params = {}
 
 
-        if model_config["module"] == "LogisticRegression":
+        if model_config["class"] == "LogisticRegression":
+            # Suggest penalty from a unified set
+
+
             # Suggest penalty from a unified set
 
             # Basic hyperparameters
             params = {
-                "solver": trial.suggest_categorical('solver', ['newton-cholesky', 'lbfgs', 'liblinear', 'sag', 'saga']),
+                "solver": trial.suggest_categorical('solver', ['newton-cholesky',"newton-cg", 'lbfgs', 'liblinear', 'sag', 'saga']),
                 "max_iter": trial.suggest_int('max_iter', 10000, 50000), # Increased max_iter to allow for better convergence
                 }
+            # Hyperparameter definitions
+            #multi_class = trial.suggest_categorical('multi_class', ['auto', 'multinomial'])
+            #params['multi_class'] = multi_class
 
-            all_penalties = ['l1', 'l2', 'elasticnet', None]
-            penalty = trial.suggest_categorical('penalty', ['l1', 'l2', 'elasticnet'])
-            #params['penalty'] = None if penalty == 'None' else penalty  # Handle string-to-None conversion
-            params['penalty'] = penalty
-            logging.info(f"params['penalty']: {params['penalty']}")
+            all_penalties = ['l1', 'l2', 'elasticnet', None] # Unified penalties
+            params['penalty'] = trial.suggest_categorical('penalty', all_penalties)
             # Only suggest C if penalty is not None
             if params['penalty'] is not None:
                 params["C"] = trial.suggest_float('C', 1e-10, 1000, log=True)
 
             # Only suggest l1_ratio if penalty is 'elasticnet'
 
-
-
-
-            if params['solver'] == 'sag' and params['penalty'] not in ['l2', None]:
-                params['penalty'] = 'l2'
-            elif params['solver'] == 'newton-cholesky' and params['penalty'] not in ['l2', None]:
-                params['penalty'] = 'l2'
-            elif params['solver'] == 'saga' and params['penalty'] not in ['elasticnet', 'l1', 'l2', None]:
-                params['penalty'] = 'elasticnet'
-            elif params['solver'] == 'liblinear' and params['penalty'] not in ['l1', 'l2']:
-                params['penalty'] = 'l2'
-            elif params['solver'] == 'lbfgs' and params['penalty'] not in ['l2', None]:
-                params['penalty'] = 'l2'
-
             if params['penalty'] == 'elasticnet':
                 params['l1_ratio'] = trial.suggest_float('l1_ratio', 0, 1)
 
 
-
-            logging.info(f"Valid params; {params}")
+            # Prune invalid combinations:
+            if (
+                (params['solver'] == 'lbfgs' and params['penalty'] not in ['l2', None]) or
+                (params['solver'] == 'liblinear' and params['penalty'] not in ['l1', 'l2']) or
+                (params['solver'] == 'sag' and params['penalty'] not in ['l2', None]) or
+                (params['solver'] == 'newton-cg' and params['penalty'] not in ['l2', None]) or
+                (params['solver'] == 'newton-cholesky' and params['penalty'] not in ['l2', None]) or
+                (params['solver'] == 'saga' and params['penalty'] not in ['elasticnet', 'l1', 'l2', None])
+                ):
+                raise optuna.TrialPruned() # Invalid combination of solver and penalty
 
 
             # Dynamically import and initialise the model
@@ -138,9 +135,6 @@ class ModelFactory:
                 else:  # Fixed parameters
                     params[param] = details
 
-            logging.info(f"Valid params; {params}")
-
-
             # Dynamically import and initialise the model
             model_class = self.class_for_name(model_config["module"], model_config["class"])
             return model_class(**params)
@@ -160,13 +154,16 @@ class ModelFactory:
             float: The mean cross-validation score.
         """
         model = self._create_model(trial, model_config)
+
         scoring = cross_val_params["scoring"]
+        cv = StratifiedKFold(n_splits=cross_val_params["CV"])
         if scoring == "f1":
             scoring = make_scorer(f1_score, average='weighted')
         score = cross_val_score(
             model, X, y,
-            cv=cross_val_params["CV"],
-            scoring=scoring
+            cv=cv,
+            scoring=scoring,
+            n_jobs=-1
         ).mean()
         return score
 
