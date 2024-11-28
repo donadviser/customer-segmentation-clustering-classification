@@ -1,6 +1,6 @@
 study:
   direction: maximize
-  n_trials: 8
+  n_trials: 100
 
 cross_validation:
   CV: 5

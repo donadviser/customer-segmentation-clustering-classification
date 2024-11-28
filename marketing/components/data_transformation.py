@@ -3,7 +3,8 @@ import os
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from typing import Union
+from typing import Union, List
+import copy
 
 
 from marketing.entity.config_entity import DataTransformationConfig
@@ -24,6 +25,7 @@ from marketing.constants import SCHEMA_FILE_PATH
 from imblearn.combine import SMOTETomek
 from sklearn.pipeline import Pipeline
 from imblearn.pipeline import Pipeline as ImbPipeline
+from sklearn.decomposition import PCA
 
 from sklearn.compose import ColumnTransformer
 
@@ -50,7 +52,7 @@ class PreprocessingPipeline:
     the overall pipeline before the model fitting step.
     """
     def __init__(self, education_map, marital_map, drop_columns, numerical_features,
-                 categorical_features, outlier_features, pipeline_type="Pipeline"):
+                 categorical_features, outlier_features, pipeline_type="Pipeline", **kwargs):
         """
         Initialize the PreprocessingPipeline with necessary parameters.
 
@@ -211,7 +213,7 @@ class DataTransformation:
         raise CustomException(e, sys)
 
 
-    def data_preprocessing(self,) -> object:
+    def transform_data(self, train_df: pd.DataFrame, test_df: pd.DataFrame) -> object:
         """
         Apply data preprocessing steps, feature engineering, and handling missing values.
 
@@ -221,17 +223,59 @@ class DataTransformation:
         try:
             logging.info("Starting data preprocessing")
 
-            # Apply feature engineering steps
-            data_train_preprocessed = self._apply_feature_engineering(self.data_train)
-            data_test_preprocessed = self._apply_feature_engineering(self.data_test)
+            preprocessor = copy.deepcopy(self.preprocessor)
 
-            # Handle missing values
-            data_train_preprocessed = self._handle_missing_values(data_train_preprocessed)
-            data_test_preprocessed = self._handle_missing_values(data_test_preprocessed)
+            transformed_train = preprocessor.fit_transform(train_df)
+            transformed_test = preprocessor.transform(test_df)
 
-            return data_train_preprocessed, data_test_preprocessed
+
+            feature_names = self.get_feature_names(preprocessor, transformed_train)
+            logging.info(f"Obtained Feature Names: {feature_names}")
+
+
+            # Convert transformed data to DataFrame with feature names
+            X_train_transformed_df = pd.DataFrame(transformed_train, columns=feature_names)
+            X_test_transformed_df = pd.DataFrame(transformed_test, columns=feature_names)
+
+
+            return X_train_transformed_df, X_test_transformed_df
+
         except Exception as e:
             self._handle_exception(e)
+
+    @staticmethod
+    def get_feature_names(pipeline, X_train):
+        """Extract feature names from a pipeline that may contain ColumnTransformer and PCA."""
+        column_transformer = None
+        pca_step_name = None
+        pca_n_components = None
+
+        # Identify ColumnTransformer and PCA in the pipeline
+        for name, step in pipeline.named_steps.items():
+            if isinstance(step, ColumnTransformer):
+                column_transformer = step
+            elif isinstance(step, PCA):
+                pca_step_name = name
+                pca_n_components = step.n_components_
+
+        # Extract feature names from ColumnTransformer
+        if column_transformer:
+            feature_names = []
+            for name, transformer, columns in column_transformer.transformers_:
+                if transformer != 'drop':
+                    if hasattr(transformer, 'get_feature_names_out'):
+                        feature_names.extend(transformer.get_feature_names_out(columns))
+                    else:
+                        feature_names.extend(columns)
+        else:
+            # Fallback to input features if no ColumnTransformer is present
+            feature_names = X_train.columns.tolist()
+
+        # If PCA exists, rename features as PC components
+        if pca_step_name:
+            feature_names = [f"PC{i+1}" for i in range(pca_n_components)]
+
+        return feature_names
 
 
     def initiate_data_transformation(self)  -> DataTransformationArtifact:
@@ -280,64 +324,42 @@ class DataTransformation:
                     drop_columns=self.drop_columns,
                     education_map=self.education_map,
                     marital_map=self.marital_map,
+                    pipeline_type="ImbPipeline",
                     #target_column=self.target_column,
                     #categorical_strategy='most_frequent',
                     #numerical_strategy='median',
-                    #outlier_strategy='iqr'  # Update this line
+                    #outlier_strategy='iqr',
+
                 )
 
-                preprocessor = preprocessing_pipeline.get_pipeline()
+                self.preprocessor = preprocessing_pipeline.get_pipeline()
+
+
+
                 preprocessor_obj_dir = os.path.dirname(self.data_transformation_config.transformed_object_file_path)
 
                 os.makedirs(preprocessor_obj_dir, exist_ok=True)
-                transformed_unfitted_object_file_path = self.main_utils.save_object(
-                    self.data_transformation_config.transformed_unfitted_file_path,
-                    preprocessor,
-                )
-                logging.info(f"Saved unfitted preprocessor object to: {transformed_unfitted_object_file_path}")
-
-                # Apply feature engineering steps
-                data_train_preprocessed = preprocessor.fit_transform(train_df)
-                data_test_preprocessed = preprocessor.transform(test_df)
-                logging.info("Applied the feature engineering steps on the data")
-                logging.info(f"data_train_preprocessed.shape: {data_train_preprocessed.shape}")
-                logging.info(f"data_test_preprocessed.shape: {data_test_preprocessed.shape}")
-
-                # Convert transformed data to DataFrame
-                #if isinstance(preprocessor.named_steps['column_transformer'], ColumnTransformer):
-                #    feature_names = preprocessor.named_steps['column_transformer'].get_feature_names_out()
-                #else:
-                column_transformer = None
-                for name, step in preprocessor.named_steps.items():
-                    if isinstance(step, ColumnTransformer):
-                        column_transformer = step
-
-
-                # Extract feature names from ColumnTransformer
-                if column_transformer:
-                    feature_names = []
-                    for name, transformer, columns in column_transformer.transformers_:
-                        if transformer != 'drop':
-                            if hasattr(transformer, 'get_feature_names_out'):
-                                feature_names.extend(transformer.get_feature_names_out(columns))
-                            else:
-                                feature_names.extend(columns)
-
-                # Convert transformed data to DataFrame for SHAP with feature names
-                X_train_transformed_df = pd.DataFrame(data_train_preprocessed, columns=feature_names)
-                X_test_transformed_df = pd.DataFrame(data_test_preprocessed, columns=feature_names)
-                logging.info(f"data_train_preprocessed.head(): {X_train_transformed_df.head()}")
-
                 transformed_object_file_path = self.main_utils.save_object(
                     self.data_transformation_config.transformed_object_file_path,
-                    preprocessor,
+                    self.preprocessor,
                 )
                 logging.info(f"Saved preprocessor object to: {transformed_object_file_path}")
 
+                # Transforms train and test data using the preprocessor
+                X_train_transformed_df, X_test_transformed_df = self.transform_data(train_df, test_df)
+                logging.info("Applied the feature engineering steps on the data")
+                logging.info(f"transformed_train.shape: {X_train_transformed_df.shape}")
+                logging.info(f"transformed_test.shape: {X_test_transformed_df.shape}")
+                logging.info(f"data_train_preprocessed.head(): {X_train_transformed_df.head()}")
+
                 #create clusters
                 create_clusters = CreateClusters(self.target_column)
-                data_train_labelled = create_clusters.initialise_clustering(X_train_transformed_df)
-                data_test_labelled = create_clusters.initialise_clustering(X_test_transformed_df)
+                data_train_labelled, data_test_labelled = create_clusters.initialise_clustering(
+                    X_train_transformed_df,
+                    X_test_transformed_df,
+                    train_df,
+                    test_df)
+
                 logging.info("Created clusters for target column")
                 logging.info(f"data_train_labelled.head(): {data_train_labelled.head()}")
 

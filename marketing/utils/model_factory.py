@@ -1,5 +1,6 @@
 import optuna
 import yaml
+import copy
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from importlib import import_module
 from collections import namedtuple
@@ -10,11 +11,11 @@ from marketing import logging
 
 # Namedtuples for structured return values
 InitializedModelDetail = namedtuple("InitializedModelDetail", ["model_name", "model", "param_space"])
-BestModel = namedtuple("BestModel", ["model_name", "best_model", "best_params", "best_score", "trial_summary"])
+BestModel = namedtuple("BestModel", ["model_name", "best_pipeline", "best_model", "best_params", "best_score", "trial_summary"])
 
 
 class ModelFactory:
-    def __init__(self, config_path):
+    def __init__(self, preprocessor, config_path):
         """
         Initialize ModelFactory with a YAML config.
 
@@ -25,6 +26,9 @@ class ModelFactory:
             self.config = yaml.safe_load(file)
         self.study_config = self.config.get("study", {})
         self.best_models = []
+        self.preprocessor = preprocessor
+
+        logging.info(f"patched preprocessor: {preprocessor}")
 
     @staticmethod
     def class_for_name(module_name, class_name):
@@ -139,33 +143,7 @@ class ModelFactory:
             model_class = self.class_for_name(model_config["module"], model_config["class"])
             return model_class(**params)
 
-    def _objective(self, trial, model_config, cross_val_params, X, y):
-        """
-        Objective function for Optuna trials.
 
-        Args:
-            trial (optuna.trial.Trial): Optuna trial object.
-            model_config (dict): Model configuration.
-            cross_val_params (dict): Cross-validation settings.
-            X (array-like): Training features.
-            y (array-like): Training targets.
-
-        Returns:
-            float: The mean cross-validation score.
-        """
-        model = self._create_model(trial, model_config)
-
-        scoring = cross_val_params["scoring"]
-        cv = StratifiedKFold(n_splits=cross_val_params["CV"])
-        if scoring == "f1":
-            scoring = make_scorer(f1_score, average='weighted')
-        score = cross_val_score(
-            model, X, y,
-            cv=cv,
-            scoring=scoring,
-            n_jobs=-1
-        ).mean()
-        return score
 
     def optimize_model(self, model_name, model_config, X, y):
         """
@@ -184,14 +162,42 @@ class ModelFactory:
         logging.info(f"Cross-validation settings: {cross_val_params}")
         logging.info(f'study_config["direction"]: {self.study_config["direction"]}')
 
+        scoring = cross_val_params["scoring"]
+        cv = StratifiedKFold(n_splits=cross_val_params["CV"])
+        if scoring == "f1":
+            scoring = make_scorer(f1_score, average='weighted')
+
+        def _objective(trial):
+            model = self._create_model(trial, model_config)
+            preprocessor_patched = copy.deepcopy(self.preprocessor)
+
+            #logging.info(f"preprocessor_patched: {preprocessor_patched}")
+
+            preprocessor_patched.steps.insert(5, ('model', model))
+            #logging.info(f"preprocessor_patched_with_model: {preprocessor_patched}")
+
+            score = cross_val_score(
+                preprocessor_patched, X, y,
+                cv=cv,
+                scoring=scoring,
+                n_jobs=-1,
+                error_score='raise'
+            ).mean()
+            return score
         study = optuna.create_study(direction=self.study_config["direction"])
-        study.optimize(
-            lambda trial: self._objective(trial, model_config, cross_val_params, X, y),
-            n_trials=self.study_config["n_trials"]
-        )
+        study.optimize(_objective,  n_trials=self.study_config["n_trials"])
+        logging.info(f'completed cross-validation for the model_name: {model_name}')
+
+
 
         best_params = study.best_params
         best_model = self._create_model(optuna.trial.FixedTrial(best_params), model_config)
+        preprocessor_patched = copy.deepcopy(self.preprocessor)
+        preprocessor_patched.steps.insert(5, ('model', best_model))
+        logging.info(f'preprocessor_patched: {preprocessor_patched}')
+        preprocessor_patched.fit(X, y)
+
+
         trial_summary = {
             "trial_number": study.best_trial.number,
             "best_score": study.best_value,
@@ -201,6 +207,7 @@ class ModelFactory:
 
         return BestModel(
             model_name=model_name,
+            best_pipeline=preprocessor_patched,
             best_model=best_model,
             best_params=best_params,
             best_score=study.best_value,
@@ -218,6 +225,7 @@ class ModelFactory:
         Returns:
             list[BestModel]: List of best models for each configuration.
         """
+
         for model_name, model_config in self.config["models"].items():
             logging.info(f"Optimising {model_name}...")
             logging.info(f"model_config: {model_config}...")

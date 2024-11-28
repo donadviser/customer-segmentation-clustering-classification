@@ -15,6 +15,7 @@ from marketing import CustomException
 from marketing.constants import SCHEMA_FILE_PATH, MODEL_CONFIG_FILE
 from marketing.utils.main_utils import MainUtils
 from marketing.utils.model_factory import ModelFactory
+from marketing.components.data_transformation import PreprocessingPipeline
 
 from sklearn.metrics import (accuracy_score, f1_score, classification_report,
 precision_score, recall_score, roc_auc_score, log_loss)
@@ -65,6 +66,7 @@ class ModelTrainer:
         try:
             data_train = self.main_utils.load_object(file_path=self.data_transformation_artifact.transformed_train_file_path)
             data_test = self.main_utils.load_object(file_path=self.data_transformation_artifact.transformed_test_file_path)
+            preprocessor = self.main_utils.load_object(file_path=self.data_transformation_artifact.transformed_object_file_path)
 
             target_col = self._schema_config['target_column']
             logging.info(f"Obtained the target column: {target_col}")
@@ -76,10 +78,20 @@ class ModelTrainer:
             #X_train, y_train = oversample.fit_resample(X_train, y_train)
 
             oversampler = RandomOverSampler(sampling_strategy='auto', random_state=42)
-            X_train, y_train = oversampler.fit_resample(X_train, y_train)
+            #X_train, y_train = oversampler.fit_resample(X_train, y_train)
 
-            # Initialise the ModelFactory
-            model_factory = ModelFactory(MODEL_CONFIG_FILE)
+            #patch preprocessor with imblearn object
+            position = 3
+            if position is None:
+                preprocessor.steps.append(('resampler', oversampler))
+            else:
+                preprocessor.steps.insert(position, ('resampler', oversampler))
+
+            #logging.info(f"patched preprocessor: {preprocessor}")
+
+
+            # Initialize the ModelFactory
+            model_factory = ModelFactory(preprocessor, MODEL_CONFIG_FILE)
             best_models = model_factory.run(X_train, y_train)
 
             # Display the results
@@ -93,13 +105,13 @@ class ModelTrainer:
             for best_model in best_models:
                 logging.info(f"Evaluating Model: {best_model.model_name}")
 
-                 
+
                 metrics = {}
 
                 # Train the best model on the training set
-                trained_model = best_model.best_model.fit(X_train, y_train)
-                y_pred = trained_model.predict(X_test)
-                y_pred_proba = trained_model.predict_proba(X_test)
+                trained_pipeline_model = best_model.best_pipeline.fit(X_train, y_train)
+                y_pred = trained_pipeline_model.predict(X_test)
+                y_pred_proba = trained_pipeline_model.predict_proba(X_test)
 
                 average = 'weighted'
 
