@@ -287,6 +287,14 @@ class DataTransformation:
                 )
 
                 preprocessor = preprocessing_pipeline.get_pipeline()
+                preprocessor_obj_dir = os.path.dirname(self.data_transformation_config.transformed_object_file_path)
+
+                os.makedirs(preprocessor_obj_dir, exist_ok=True)
+                transformed_unfitted_object_file_path = self.main_utils.save_object(
+                    self.data_transformation_config.transformed_unfitted_file_path,
+                    preprocessor,
+                )
+                logging.info(f"Saved unfitted preprocessor object to: {transformed_unfitted_object_file_path}")
 
                 # Apply feature engineering steps
                 data_train_preprocessed = preprocessor.fit_transform(train_df)
@@ -320,13 +328,11 @@ class DataTransformation:
                 X_test_transformed_df = pd.DataFrame(data_test_preprocessed, columns=feature_names)
                 logging.info(f"data_train_preprocessed.head(): {X_train_transformed_df.head()}")
 
-                preprocessor_obj_dir = os.path.dirname(self.data_transformation_config.transformed_object_file_path)
-
-                os.makedirs(preprocessor_obj_dir, exist_ok=True)
                 transformed_object_file_path = self.main_utils.save_object(
                     self.data_transformation_config.transformed_object_file_path,
                     preprocessor,
                 )
+                logging.info(f"Saved preprocessor object to: {transformed_object_file_path}")
 
                 #create clusters
                 create_clusters = CreateClusters(self.target_column)

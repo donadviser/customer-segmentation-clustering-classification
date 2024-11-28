@@ -38,6 +38,7 @@ FILE_NAME: str = "marketing_campaign.csv"
 TRAIN_FILE_NAME: str = "train.csv"
 TEST_FILE_NAME: str = "test.csv"
 PREPROCSSING_OBJECT_FILE_NAME = "preprocessing.pkl"
+PREPROCESSOR_UNFITTED_FILE_NAME = "precoessor_unfitted.pkl"
 MODEL_FILE_NAME = "model.pkl"
 
 

@@ -42,6 +42,9 @@ class DataTransformationConfig:
     transformed_object_file_path = os.path.join(data_transformation_dir,
                                                 DATA_TRANSFORMATION_TRANSFORMED_OBJECT_DIR,
                                                 PREPROCSSING_OBJECT_FILE_NAME)
+    transformed_unfitted_file_path = os.path.join(data_transformation_dir,
+                                                  DATA_TRANSFORMATION_TRANSFORMED_OBJECT_DIR,
+                                                  PREPROCESSOR_UNFITTED_FILE_NAME)
 
 
 @dataclass
