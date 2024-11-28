@@ -20,6 +20,7 @@ from sklearn.metrics import (accuracy_score, f1_score, classification_report,
 precision_score, recall_score, roc_auc_score, log_loss)
 
 from imblearn.over_sampling import SMOTE
+from imblearn.over_sampling import RandomOverSampler
 
 
 
@@ -71,8 +72,11 @@ class ModelTrainer:
             X_test, y_test = self.main_utils.separate_data(data_test, target_col)
 
             # transform the dataset
-            oversample = SMOTE()
-            X_train, y_train = oversample.fit_resample(X_train, y_train)
+            #oversample = SMOTE()
+            #X_train, y_train = oversample.fit_resample(X_train, y_train)
+
+            oversampler = RandomOverSampler(sampling_strategy='auto', random_state=42)
+            X_train, y_train = oversampler.fit_resample(X_train, y_train)
 
             # Initialise the ModelFactory
             model_factory = ModelFactory(MODEL_CONFIG_FILE)
@@ -87,28 +91,32 @@ class ModelTrainer:
 
             #Use the best models for predictions
             for best_model in best_models:
-                logging.info(f"\nEvaluating Model: {best_model.model_name}")
+                logging.info(f"Evaluating Model: {best_model.model_name}")
 
-                n_classes = 3
+                 
                 metrics = {}
 
                 # Train the best model on the training set
                 trained_model = best_model.best_model.fit(X_train, y_train)
                 y_pred = trained_model.predict(X_test)
-                y_pred_proba = trained_model.predict_proba(X_test)[:, 1]
+                y_pred_proba = trained_model.predict_proba(X_test)
+
+                average = 'weighted'
 
                 # Calculate evaluation metrics
-                metrics['Precision (macro)'] = precision_score(y_test, y_pred, average='macro')
-                metrics['Recall (macro)'] = recall_score(y_test, y_pred, average='macro')
-                metrics['F1 Score (macro)'] = f1_score(y_test, y_pred, average='macro')
+                metrics[f'Precision ({average})'] = precision_score(y_test, y_pred, average=average)
+                metrics[f'Recall ({average})'] = recall_score(y_test, y_pred, average=average)
+                metrics[f'F1 Score ({average})'] = f1_score(y_test, y_pred, average=average)
                 metrics['Accuracy'] = accuracy_score(y_test, y_pred)
-                #metrics['Log Loss'] = log_loss(y_test, y_test)
+                metrics['Log Loss'] = log_loss(y_test, y_pred_proba)
+                #metrics['AUC-ROC'] = roc_auc_score(y_test, y_pred_proba)
 
                 logging.info(f"Test Accuracy: {metrics['Accuracy']:.4f}")
-                logging.info(f"Test Precision: {metrics['Precision (macro)']:.4f}")
-                logging.info(f"Test Recall: {metrics['Recall (macro)']:.4f}")
-                logging.info(f"Test F1 Score: {metrics['F1 Score (macro)']:.4f}")
-                #logging.info(f"Test Log Loss: {metrics['Log Loss']:.4f}")
+                logging.info(f"Test Precision ({average}): {metrics[f'Precision ({average})']:.4f}")
+                logging.info(f"Test Recall ({average}): {metrics[f'Recall ({average})']:.4f}")
+                logging.info(f"Test F1 Score ({average}): {metrics[f'F1 Score ({average})']:.4f}")
+                logging.info(f"Test Log Loss: {metrics['Log Loss']:.4f}")
+                #logging.info(f"Test AUC-ROC: {metrics['AUC-ROC']:.4f}")
                 logging.info("\nClassification Report:")
                 logging.info(classification_report(y_test, y_pred))
 
