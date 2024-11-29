@@ -1,8 +1,8 @@
 study:
   direction: maximize
-  n_trials: 100
+  n_trials: 30
 
-cross_validation:
+cross_val:
   CV: 5
   scoring: "f1_macro"
   random_state: 42
@@ -14,6 +14,7 @@ models:
     class: AdaBoostClassifier
     short_name: AdaBoost
     parameters:
+      random_state: 42
       n_estimators:
         type: int
         min: 50
@@ -29,6 +30,7 @@ models:
     class: RandomForestClassifier
     short_name: RandomForest
     parameters:
+      random_state: 42
       n_estimators:
         type: int
         min: 50
@@ -71,6 +73,7 @@ models:
     class: XGBClassifier
     short_name: XGBoost
     parameters:
+      random_state: 42
       verbosity: 0
       objective: binary:logistic
       n_estimators:
@@ -122,3 +125,134 @@ models:
         min: 1.0e-08
         max: 1.0
         log: true
+  LightGBMClassifier:
+    module: lightgbm
+    class: LGBMClassifier
+    short_name: LightGBM
+    parameters:
+      random_state: 42
+      verbosity: -1
+      objective: multiclass
+      num_classes: 3
+      n_estimators:
+        type: int
+        min: 50
+        max: 1000
+      max_depth:
+        type: int
+        min: -1
+        max: 10
+      learning_rate:
+        type: float
+        min: 0.01
+        max: 0.3
+        log: true
+      num_leaves:
+        type: int
+        min: 20
+        max: 300
+      reg_alpha:
+        type: float
+        min: 1.0e-3
+        max: 10
+        log: true
+      reg_lambda:
+        type: float
+        min: 1.0e-3
+        max: 10
+        log: true
+      colsample_bytree:
+        type: float
+        min: 0.5
+        max: 1.0
+      subsample:
+        type: float
+        min: 0.5
+        max: 1.0
+      boosting_type:
+        - "gbdt"
+        - "dart"
+  GradientBoostingClassifier:
+    module: sklearn.ensemble
+    class: GradientBoostingClassifier
+    short_name: GradientBoosting
+    parameters:
+      random_state: 42
+      n_estimators:
+        type: int
+        min: 50
+        max: 1000
+      learning_rate:
+        type: float
+        min: 0.01
+        max: 0.3
+        log: true
+      max_depth:
+        type: int
+        min: 3
+        max: 10
+      min_samples_split:
+        type: int
+        min: 2
+        max: 20
+      min_samples_leaf:
+        type: int
+        min: 1
+        max: 20
+      subsample:
+        type: float
+        min: 0.5
+        max: 1.0
+  KNeighborsClassifier:
+    module: sklearn.neighbors
+    class: KNeighborsClassifier
+    short_name: KNN
+    parameters:
+        n_neighbors:
+          type: int
+          min: 1
+          max: 50
+        weights:
+          - uniform
+          - distance
+        p:
+          type: int
+          min: 1
+          max: 2
+        leaf_size:
+          type: int
+          min: 10
+          max: 100
+        metric:
+          - euclidean
+          - manhattan
+          - minkowski
+          - chebyshev
+  CatBoostClassifier:
+    module: catboost
+    class: CatBoostClassifier
+    short_name: CatBoost
+    loss_function: MultiClass
+    parameters:
+      verbose: 0
+      random_state: 24
+      objective:
+        - Logloss
+        - CrossEntropy
+      colsample_bylevel:
+        type: float
+        min: 0.01
+        max: 0.1
+      depth:
+        type: int
+        min: 1
+        max: 12
+      boosting_type:
+        - Ordered
+        - Plain
+      bootstrap_type:
+        - Bayesian
+        - Bernoulli
+        - MVS
+
+

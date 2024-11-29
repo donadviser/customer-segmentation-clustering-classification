@@ -4,8 +4,8 @@ import sys
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from marketing.entity.config_entity import DataIngestionConfig
-from marketing.entity.artifact_entity import DataIngestionArtifact
+from marketing.entity import DataIngestionConfig
+from marketing.entity import DataIngestionArtifact
 from marketing import logging
 from marketing import CustomException
 from marketing.cloud_storage.mongodb_data import MarketingCampaignData

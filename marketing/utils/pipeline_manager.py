@@ -1,25 +1,11 @@
-import os
 import sys
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 import optuna
-from typing import Union, Dict, Tuple
-from typing_extensions import Annotated
-from optuna.samplers import TPESampler
+from typing import Union
 from dataclasses import dataclass
-
 from marketing import logging
 from marketing import CustomException
-from marketing.constants import MODEL_CONFIG_FILE, MODEL_SAVE_FORMAT, PARAM_FILE_PATH
-from marketing.entity import ModelTrainerConfig
-from marketing.entity import (
-    DataIngestionArtefacts,
-    DataTransformationArtefacts,
-    ModelTrainerArtefacts,
-)
+
 
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import (
@@ -27,24 +13,10 @@ from sklearn.preprocessing import (
     OrdinalEncoder, PowerTransformer,
     RobustScaler, MinMaxScaler,
     FunctionTransformer)
-from sklearn.model_selection import   cross_val_score, StratifiedKFold
+
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from imblearn.pipeline import Pipeline as ImbPipeline
-
-from sklearn.ensemble import (RandomForestClassifier,
-                              GradientBoostingClassifier,
-                              AdaBoostClassifier)
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC
-from xgboost import XGBClassifier
-from lightgbm import LGBMClassifier
-from catboost import CatBoostClassifier
-
-from sklearn.metrics import (accuracy_score, precision_score, recall_score,
-                             f1_score, roc_auc_score)
 
 from sklearn.decomposition import PCA
 from imblearn.over_sampling import (
@@ -171,12 +143,12 @@ class PipelineManager:
         """
         return self.pipeline
 
-    def instantiate_numerical_simple_imputer(self, strategy: str=None, fill_value: int=-1) -> SimpleImputer:
+    def instantiate_numerical_simple_imputer(self, strategy: str=None, fill_value: int=0) -> SimpleImputer:
         if strategy is None and self.trial:
             strategy = self.trial.suggest_categorical('numerical_imputer', ['mean', 'median', 'most_frequent'])
         return SimpleImputer(strategy=strategy, fill_value=fill_value)
 
-    def instantiate_categorical_simple_imputer(self, strategy: str=None, fill_value: str='missing') -> SimpleImputer:
+    def instantiate_categorical_simple_imputer(self, strategy: str=None, fill_value: str=0) -> SimpleImputer:
         if strategy is None and self.trial:
             strategy = self.trial.suggest_categorical('categorical_imputer', ['most_frequent', 'constant'])
         return SimpleImputer(strategy=strategy, fill_value=fill_value)
@@ -240,23 +212,13 @@ class PipelineManager:
                         #('scaler', StandardScaler())  # Add scaler if needed
                     ]), self.numerical_features),
 
-
-
-                    ('ord', Pipeline([
-                        ('imputer', self.instantiate_categorical_simple_imputer(strategy=self.categorical_strategy)),
-                        ('ordinal', OrdinalEncoder())
-                    ]), self.categorical_features),
-
                     ('out', Pipeline([
                         ('imputer', self.instantiate_numerical_simple_imputer(strategy=self.numerical_strategy)),
                         ('outlier', self.instantiate_outliers(strategy=self.outlier_strategy))
-                    ]), self.outlier_features_features),
+                    ]), self.outlier_features),
                 ],
                 remainder='passthrough'
             )
-
-
-
 class ResamplerSelector:
     """
     A class to select and return a resampling algorithm based on a given parameter or
@@ -277,7 +239,7 @@ class ResamplerSelector:
         self.trial = trial
         self.random_state = random_state
 
-    def get_resampler(self, resampler=None):
+    def build(self, resampler=None):
         """
         Return the resampling algorithm based on the provided `resampler` parameter.
         If `resampler` is not given, it is suggested from the trial.
@@ -300,7 +262,7 @@ class ResamplerSelector:
             )"""
 
         if resampler == 'RandomOverSampler':
-            return RandomOverSampler(random_state=self.random_state)
+            return RandomOverSampler(sampling_strategy='auto', random_state=self.random_state)
         elif resampler == 'ADASYN':
             return ADASYN(random_state=self.random_state)
         elif resampler == 'RandomUnderSampler':
@@ -333,7 +295,7 @@ class ScalerSelector:
         """
         self.trial = trial
 
-    def get_scaler(self, scaler_name=None):
+    def build(self, scaler_name=None):
         """
         Return the scaling algorithm based on the provided `scaler_name` parameter.
         If `scaler_name` is not given, it is suggested from the trial.
@@ -379,7 +341,7 @@ class DimensionalityReductionSelector:
         """
         self.trial = trial
 
-    def get_dimensionality_reduction(self, dim_red=None, pca_n_components=5):
+    def build(self, dim_red=None, pca_n_components=5):
         """
         Return the dimensionality reduction algorithm based on the provided `dim_red` parameter.
         If `dim_red` is not given, it is suggested from the trial.
