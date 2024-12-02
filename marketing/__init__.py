@@ -6,14 +6,14 @@ from marketing.constants import ARTIFACT_DIR, LOG_DIR, LOG_FILE, TIMESTAMP
 
 logging_str = "[%(asctime)s: %(name)s: %(levelname)s: %(funcName)s: %(lineno)d: %(message)s]"
 
-logs_path = os.path.join(from_root(), ARTIFACT_DIR, TIMESTAMP, LOG_DIR)
-os.makedirs(logs_path, exist_ok=True)
-log_file_path = os.path.join(logs_path, LOG_FILE)
+# logs_path = os.path.join(from_root(), ARTIFACT_DIR, TIMESTAMP, LOG_DIR)
+# os.makedirs(logs_path, exist_ok=True)
+# log_file_path = os.path.join(logs_path, LOG_FILE)
 
 
-#log_dir = "logs"
-#log_filepath = os.path.join(log_dir,"running_logs.log")
-#os.makedirs(log_dir, exist_ok=True)
+log_dir = "logs"
+log_file_path = os.path.join(log_dir,"running_logs.log")
+os.makedirs(log_dir, exist_ok=True)
 
 logging.basicConfig(
     level= logging.INFO,

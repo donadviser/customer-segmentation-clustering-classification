@@ -252,19 +252,19 @@ class ResamplerSelector:
             resampler_obj (object): The resampling instance based on the selected method.
         """
         if resampler is None and self.trial:
-            resampler = self.trial.suggest_categorical(
+            """ resampler = self.trial.suggest_categorical(
                 'resampler', ['RandomOverSampler', 'ADASYN', 'RandomUnderSampler', 'NearMiss',
                               'SMOTEENN', 'SMOTETomek']
-            )
+            ) """
 
-            """resampler = self.trial.suggest_categorical(
-                'resampler', ['SMOTEENN',]
-            )"""
+            resampler = self.trial.suggest_categorical(
+                'resampler', ['RandomOverSampler',]
+            )
 
         if resampler == 'RandomOverSampler':
             return RandomOverSampler(sampling_strategy='auto', random_state=self.random_state)
         elif resampler == 'ADASYN':
-            return ADASYN(random_state=self.random_state)
+            return ADASYN(sampling_strategy='minority', random_state=self.random_state)
         elif resampler == 'RandomUnderSampler':
             return RandomUnderSampler(random_state=self.random_state)
         elif resampler == 'NearMiss':
@@ -310,8 +310,8 @@ class ScalerSelector:
 
         # -- Instantiate scaler (skip scaler for CatBoostClassifier as it handles categorical features internally)
         if scaler_name is None and self.trial:
-            scaler_name = self.trial.suggest_categorical("scaler", ['minmax', 'standard', 'robust'])
-            #scaler_name = self.trial.suggest_categorical("scaler", ['robust'])
+            #scaler_name = self.trial.suggest_categorical("scaler", ['minmax', 'standard', 'robust'])
+            scaler_name = self.trial.suggest_categorical("scaler", ['robust'])
 
         if scaler_name == "minmax":
             return MinMaxScaler()

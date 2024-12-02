@@ -1,6 +1,8 @@
 import sys
 import pandas as pd
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 import optuna
 from typing import Dict, Tuple
@@ -369,25 +371,29 @@ class ModelFactory:
         """
 
         scoring = self.cross_val_config["scoring"]
-        cv = StratifiedKFold(n_splits=self.cross_val_config["CV"])
+        cv = StratifiedKFold(n_splits=self.cross_val_config["cv"])
         if scoring == "f1":
             scoring = make_scorer(f1_score, average='weighted')
 
 
-
+        scores_list = []
         def _objective(trial):
             model = self._create_model(trial, model_config)
             pipeline_model = self.get_preprocessor_pipeline(trial, model)
 
-            score = cross_val_score(
+            scores = cross_val_score(
                 pipeline_model, X_train, y_train,
                 cv=cv,
                 scoring=scoring,
-                n_jobs=-1,
+                n_jobs=self.cross_val_config["n_jobs"],
                 error_score='raise',
-                verbose=0
-            ).mean()
-            return score
+                verbose=self.cross_val_config["verbose"]
+            )
+
+            # Save the scores for each model
+            mean_score = scores.mean()
+            scores_list.extend(scores)
+            return mean_score
 
 
         study = optuna.create_study(direction=self.study_config["direction"])
@@ -420,8 +426,9 @@ class ModelFactory:
             best_model=best_model,
             best_params=best_params,
             best_score=study.best_value,
-            trial_summary=trial_summary
-        )
+            trial_summary=trial_summary,
+
+        ), scores_list
 
 
     def run(self, X, y):
@@ -435,11 +442,40 @@ class ModelFactory:
         Returns:
             list[BestModel]: List of best models for each configuration.
         """
+        scores_dict = {}
         for model_name, model_config in self.model_config.items():
             logging.info(f"Optimising {model_name}...")
-            best_model_detail = self.optimize_model(model_name, model_config, X, y)
-            """self.best_models.append(best_model_detail)
+            best_model_detail, scores_list = self.optimize_model(model_name, model_config, X, y)
+            self.best_models.append(best_model_detail)
 
             logging.info(f"Best {model_name} Params: {best_model_detail.best_params}")
             logging.info(f"Best {model_name} Score: {best_model_detail.best_score:.4f}")
-        return self.best_models"""
+            model_short_name = model_config['short_name']
+            scores_dict[model_short_name] = scores_list
+        logging.info(f"Length of scores_dict {len(scores_dict)}")
+
+        # Plotting boxplot for the training scores of each classifier
+        sns.set(style="darkgrid")
+        plt.figure(figsize=(12, 6))
+        sns.boxplot(data=[scores for scores in scores_dict.values()],
+                    orient="v",
+                    palette="Set3")
+        plt.xticks(ticks=range(len(scores_dict)), labels=scores_dict.keys())
+        plt.title("Comparison of Training Scores for Each Classifier")
+        plt.xlabel("Classifier")
+        plt.ylabel("Optuna Hyperparameter Tunning Cross-validation F1 Score ")
+
+
+        # Superimposing mean scores as scatter points with higher zorder
+        mean_scores = [np.mean(scores) for scores in scores_dict.values()]
+        for i, mean_score in enumerate(mean_scores):
+            plt.scatter(i, mean_score, color='red', marker='o', s=100, label='Mean Score' if i == 0 else "", zorder=10)
+        plt.xticks(rotation=45, ha="right")
+        plt.legend()
+
+        file_path =  "Boxplot_training_score.png"
+        plt.savefig(file_path, bbox_inches='tight')
+        plt.close()
+        logging.info("Boxplot for training score saved")
+
+        return self.best_models

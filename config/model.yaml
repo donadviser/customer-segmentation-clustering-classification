@@ -1,11 +1,15 @@
 study:
   direction: maximize
-  n_trials: 30
+  n_trials: 100
 
 cross_val:
-  CV: 5
+  cv: 5
   scoring: "f1_macro"
   random_state: 42
+  verbose: 0
+  n_jobs: -1
+
+n_models: all
 
 
 models:
@@ -73,44 +77,8 @@ models:
     class: XGBClassifier
     short_name: XGBoost
     parameters:
-      random_state: 42
       verbosity: 0
-      objective: binary:logistic
-      n_estimators:
-        type: int
-        min: 50
-        max: 1000
-      max_depth:
-        type: int
-        min: 3
-        max: 10
-      learning_rate:
-        type: float
-        min: 0.01
-        max: 0.3
-        log: true
-      gamma:
-        type: float
-        min: 0.0
-        max: 5.0
-      reg_alpha:
-        type: float
-        min: 1.0e-3
-        max: 10
-        log: true
-      reg_lambda:
-        type: float
-        min: 1.0e-3
-        max: 10
-        log: true
-      subsample:
-        type: float
-        min: 0.5
-        max: 1.0
-      colsample_bytree:
-        type: float
-        min: 0.5
-        max: 1.0
+      objective: multi:softmax
       booster:
         - gbtree
         - gblinear
@@ -125,6 +93,14 @@ models:
         min: 1.0e-08
         max: 1.0
         log: true
+      subsample:
+        type: float
+        min: 0.2
+        max: 1.0
+      colsample_bytree:
+        type: float
+        min: 0.2
+        max: 1.0
   LightGBMClassifier:
     module: lightgbm
     class: LGBMClassifier
@@ -232,13 +208,10 @@ models:
     module: catboost
     class: CatBoostClassifier
     short_name: CatBoost
-    loss_function: MultiClass
     parameters:
       verbose: 0
-      random_state: 24
-      objective:
-        - Logloss
-        - CrossEntropy
+      random_state: 42
+      objective: MultiClass
       colsample_bylevel:
         type: float
         min: 0.01
@@ -254,5 +227,42 @@ models:
         - Bayesian
         - Bernoulli
         - MVS
+#  SVC:
+    # module: sklearn.svm
+    # class: SVC
+    # short_name: SVC
+    # parameters:
+    #   C:
+    #     type: float
+    #     min: 1.0e-4
+    #     max: 1000.0
+    #     log: True
+    #   kernel:
+    #     - "linear"
+    #     - "poly"
+    #     - "rbf"
+    #     - "sigmoid"
+    #   degree:
+    #     type: int
+    #     min: 2
+    #     max: 5
+    #   gamma:
+    #     - "scale"
+    #     - "auto"
+    #   coef0:
+    #     type: float
+    #     min: 0.0
+    #     max: 1.0
+    #   probability: True
+    #   shrinking: True
+    #   tol:
+    #     type: float
+    #     min: 1.0e-5
+    #     max: 1.0e-2
+    #     log: True
+    #   max_iter:
+    #     type: int
+    #     min: -1  # Default unlimited iterations
+    #     max: 10000
 
 
