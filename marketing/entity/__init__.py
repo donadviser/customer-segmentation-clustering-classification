@@ -3,6 +3,8 @@ from marketing.entity.config_entity import (
     DataTransformationConfig,
     DataValidationConfig,
     ModelTrainerConfig,
+    ModelEvaluationConfig,
+
 )
 
 from marketing.entity.artifact_entity import (
@@ -10,4 +12,6 @@ from marketing.entity.artifact_entity import (
     DataTransformationArtifact,
     DataValidationArtifact,
     ModelTrainerArtifact,
+    ModelEvaluationArtifact,
+    ClassificationMetricArtifact,
 )

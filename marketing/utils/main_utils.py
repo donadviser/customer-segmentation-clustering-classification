@@ -223,14 +223,15 @@ class MainUtils:
     def update_model_score(self, best_model_info: Dict) -> None:
         logging.info("Entered the update_model_score method of MainUtils class")
         try:
-            model_config = self.read_yaml_file(filename=MODEL_CONFIG_FILE)
+            param_config = self.read_yaml_file(filename=PARAM_FILE_PATH)
             best_model_score = best_model_info['best_model_score']
             best_model_name = best_model_info['best_model_name']
+            best_model_scoring = best_model_info['best_model_scoring']
 
-            model_config["base_model_score"] = str(best_model_score)
-            model_config["base_model_name"] = str(best_model_name)
-            with open(MODEL_CONFIG_FILE, "w+") as file_obj:
-                safe_dump(model_config, file_obj, sort_keys=False)
+            param_config['base_model']['model_score'] = str(best_model_score)
+            param_config['base_model']['model_name'] = str(best_model_name)
+            with open(PARAM_FILE_PATH, "w+") as file_obj:
+                safe_dump(param_config, file_obj, sort_keys=False)
             logging.info("Exited the update_model_score method of MainUtils class")
         except Exception as e:
             raise CustomException(e, sys)

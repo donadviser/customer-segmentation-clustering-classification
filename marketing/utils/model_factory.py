@@ -34,7 +34,7 @@ from datetime import datetime
 from marketing.utils.main_utils import MainUtils
 
 
-BestModel = namedtuple("BestModel", ["model_name", "best_pipeline", "best_model", "best_params", "best_score", "trial_summary"])
+BestModel = namedtuple("BestModel", ["model_name", "best_pipeline", "best_model", "best_params", "best_score", "trial_summary", "scores_list"])
 
 
 class CostModel:
@@ -100,9 +100,13 @@ class CostModel:
             self._handle_exception(e)
 
 
-    def evaluate(self, y_true, y_pred, y_pred_proba=None, n_classes=3)-> Dict[str, float]:
+    def evaluate(self, y_true, y_pred, y_pred_proba=None, n_classes=None)-> Dict[str, float]:
         metrics = {}
         try:
+            if n_classes is None:
+                n_classes = len(np.unique(y_true))
+            logging.info(f"No of unique classes in y_true: {n_classes}")
+
             # Accuracy
             metrics['accuracy'] = accuracy_score(y_true, y_pred)
 
@@ -236,7 +240,7 @@ class ModelFactory:
         model_hyperparams (dict): The best hyperparameters for the model.
     """
 
-    def __init__(self, transformer_pipeline_config, config_path):
+    def __init__(self, transformer_pipeline_config, model_config, param_constants):
         """
         Initialize ModelFactory with a YAML config.
 
@@ -244,12 +248,15 @@ class ModelFactory:
             config_path (str): Path to the configuration file in YAML format.
         """
         main_utils = MainUtils()
-        self.config = main_utils.read_yaml_file(config_path)
+        self.model_config = model_config
+        self.param_constants = param_constants
         self.transformer_pipeline_config = transformer_pipeline_config
 
-        self.study_config = self.config.get("study", {})
-        self.model_config = self.config.get("models", {})
-        self.cross_val_config = self.config.get("cross_val", {})
+        self.study_config = self.param_constants.get("study", {})
+        self.model_config = self.model_config.get("models", {})
+        self.cross_val_config = self.param_constants.get("cross_val", {})
+        self.model_list_config = self.param_constants.get("model_list", {})
+        self.base_model_config = self.param_constants.get("base_model", {})
         self.best_models = []
 
 
@@ -427,8 +434,8 @@ class ModelFactory:
             best_params=best_params,
             best_score=study.best_value,
             trial_summary=trial_summary,
-
-        ), scores_list
+            scores_list=scores_list
+        )
 
 
     def run(self, X, y):
@@ -445,13 +452,13 @@ class ModelFactory:
         scores_dict = {}
         for model_name, model_config in self.model_config.items():
             logging.info(f"Optimising {model_name}...")
-            best_model_detail, scores_list = self.optimize_model(model_name, model_config, X, y)
+            best_model_detail = self.optimize_model(model_name, model_config, X, y)
             self.best_models.append(best_model_detail)
 
             logging.info(f"Best {model_name} Params: {best_model_detail.best_params}")
             logging.info(f"Best {model_name} Score: {best_model_detail.best_score:.4f}")
             model_short_name = model_config['short_name']
-            scores_dict[model_short_name] = scores_list
+            scores_dict[model_short_name] = best_model_detail.scores_list
         logging.info(f"Length of scores_dict {len(scores_dict)}")
 
         # Plotting boxplot for the training scores of each classifier

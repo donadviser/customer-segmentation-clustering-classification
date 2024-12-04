@@ -40,6 +40,7 @@ TEST_FILE_NAME: str = "test.csv"
 PREPROCSSING_OBJECT_FILE_NAME = "preprocessing.pkl"
 PREPROCESSOR_UNFITTED_FILE_NAME = "precoessor_unfitted.pkl"
 MODEL_FILE_NAME = "model.pkl"
+TRAINING_BUCKET_NAME = "customer-segmentation-model"
 
 
 """
@@ -74,15 +75,19 @@ MODEL TRAINER related constant start with MODEL_TRAINER var name
 """
 MODEL_TRAINER_DIR_NAME: str = "model_trainer"
 MODEL_TRAINER_TRAINED_MODEL_DIR: str = "trained_model"
-MODEL_TRAINER_TRAINED_MODEL_NAME: str = "model.pkl"
 MODEL_SAVE_FORMAT = ".pkl"
 MODEL_TRAINER_EXPECTED_SCORE: float = 0.6
-MODEL_TRAINED_FOR_PRODUCTION: str = "prod_model"
 METRICS_DIR_NAME: str = "metrics"
 
 """
 MODEL Evauation related constant start with MODEL_EVALUATION var name
 """
-
 MODEL_EVALUATION_CHANGED_THRESHOLD_SCORE: float = 0.02
-#MODEL_PUSHER_BUCKET_NAME = TRAINING_BUCKET_NAME
+MODEL_PUSHER_BUCKET_NAME = TRAINING_BUCKET_NAME
+MODEL_TRAINED_FOR_PRODUCTION_NAME: str = "model.pkl"
+MODEL_TRAINED_FOR_PRODUCTION_DIR: str = "prod_model"
+
+# AWS ACCESS KEYS
+AWS_ACCESS_KEY_ID = environ["AWS_ACCESS_KEY_ID"]
+AWS_SECRET_ACCESS_KEY = environ["AWS_SECRET_ACCESS_KEY"]
+REGION_NAME = "us-east-1"

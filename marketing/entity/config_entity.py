@@ -50,10 +50,17 @@ class DataTransformationConfig:
 @dataclass
 class ModelTrainerConfig:
     model_training_dir: str = os.path.join(training_pipeline_config.artifact_dir, MODEL_TRAINER_DIR_NAME)
-    trained_model_file_path: str = os.path.join(model_training_dir, MODEL_TRAINER_TRAINED_MODEL_DIR, MODEL_TRAINER_TRAINED_MODEL_NAME)
+    trained_model_file_path: str = os.path.join(model_training_dir, MODEL_TRAINER_TRAINED_MODEL_DIR)
     expected_score: float = MODEL_TRAINER_EXPECTED_SCORE
-    model_trained_for_production_path: str = os.path.join(training_pipeline_config.artifact_dir,MODEL_TRAINED_FOR_PRODUCTION, MODEL_TRAINER_TRAINED_MODEL_NAME)
     metrics_dir: str = os.path.join(training_pipeline_config.artifact_dir, METRICS_DIR_NAME)
+
+
+@dataclass
+class ModelEvaluationConfig:
+    model_trained_for_production_path: str = os.path.join(training_pipeline_config.artifact_dir,MODEL_TRAINED_FOR_PRODUCTION_DIR, MODEL_TRAINED_FOR_PRODUCTION_NAME)
+    changed_threshold_score: float = MODEL_EVALUATION_CHANGED_THRESHOLD_SCORE
+    bucket_name: str = MODEL_PUSHER_BUCKET_NAME
+    s3_model_key_path: str = MODEL_FILE_NAME
 
 
 class PCAConfig:
