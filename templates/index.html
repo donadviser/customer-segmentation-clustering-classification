@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Customer Segmentation Clustering and Classification</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='./css/style.css')}}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-warning static-top">
+        <div class="container-fluid">
+          <a class = "navbar-brand" href="https://github.com/donadviser/customer-segmentation-clustering-classification" class="top-left-link" target="_blank">Github Repository Link</a>
+          <h2>&nbsp;&nbsp;&nbsp;&nbsp;Customer Segmentation Clustering and Classification &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h2>
+          <h5>Derrick Njobuenwu&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h5>
+          <!--<a class = "navbar-brand" href="https://github.com/therealabhishek/shipment_price_prediction_endtoend" target="_blank">Github Repository Link</a>-->
+          <!--<a class="navbar-brand" href="https://ineuron.ai"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIkAAAAlCAMAAABBJDpuAAAAVFBMVEX/fgD/iQA7NzIyMjMnNYInNYEnNYInNYEzMzInNYQnNYETJzsnNYIwN1wxMjNoTis4O1YrNm0xOF47PE9DP0dEQEVpTVkAJJ4nNYEOLJHJbiAzMzOmmmHRAAAAFnRSTlOh/vu+986oen9fP2UqEzQkFAIDAAEEILVBJQAAA3FJREFUWMPNmO2WoyAMQG0VBARtdVRs3/89NwkgaF1rd2aOm18tIrnkgwSz7n+R7LcV1ELkeS7E7VySRlyfQXJhTiO55c+liP4cEuH1X8E7gaV+S3Jv2zYZ/Vr+/Sdx2vP6doc/fSPcf/GOpLSFVXFUW8t+giRP47TOd60yk1hbxIhSP0ACKPWrvw7YBIT/lcQY84G3Wk17ugWQfg5UsQJpjflKSLQi7xTWyk0SXTJ4VnB5D1yccxmp4Z+mX5KGNS+SPXVNll0ulyxL0wYmloBB6zL/MpCoAgjAJiUM6w0SboMwPUdRogvNKcNM3smFdRvEcJJkKcflQa+X0pNIfBGW0zKqjyQtw4VLKQlI7ZLgdrRNSZDjMQx2GB4pCkxkCrfGWUTJ0Egan6muCHgJCUwtnCk0mrJ9Q8K5LUqtdSfynkAedhynaRqngVDaXLiJEAzkFkM71IuIlWRYtSQpbXSZDvQ7JPCei9brs+oaABkn74LRIkpFaVxGnzjvIxTYREOoEwn5r01JTDRTcO87Eu3zNUeTPKZpjrIRrNIDCjzALbPk7LJMIokOEQu2K7yKQAKvFDF9pVe0R+LGb7h1MMkw2ijjA/1zhSfSphvEAChXJEhAqwYStIJWXnTpvbdH4hTUwSQ2JRmQpILDLYbB7J41SYiLcNozu5Z3JMo7RxBJahI7WSRByCMkqJt9hySESbVJcvmARJGFExJmdBSl2oM2+T4JLWfgaGFptizlPUm1FydHSdyZ7UnS4ySph2kS0kJrkvr5NJg7dnrJnfxgxPozRPGtkyPNOxtaiDvbIAF9L+5B5zTI2BwlwXmM+U3zReav3o0F8oUEFFZ42McDZYomOUziFmezgWyo251Uc1nyKJol7URCEvIYUEbHYaEGQi9C9egwCdVfHwiaajfjKMUcHcRacCylhWJbJDfq47EEDhYqoIWjHnwDXZPpPiChPQelLU+Cbm4w50FmYgkvFwpiWwCC/Um/SLcNElOC9RVj6qWpCiEMvRUK4zLpdKmPw8rVldy/qxjn60wLrVLWJIPLiZJRr3fsvnOHPvare+lB93tb37T20D82jqOt+zNuXhuNvNhp7X+PpHb3rvV9R5xjE2SpyCN9ffQO+GtWIZr5Xnytz4gTMIRYfys47/uJEXny/aQ/95tSUwmU+uRvSp/IHzQqZYpYrQmxAAAAAElFTkSuQmCC" /></a>-->
+
+
+        </div>
+     </nav>
+
+    <section>
+        <div class="container-fluid">
+            <div class="container">
+                <form action="/predict" method="post">
+                    <br>
+                    <!--<legend>Enter the below details to get your shipment price:</legend> -->
+
+                    <h5>Customer Segmentation Clustering and Classification Form</h5>
+                    <br>
+
+                    <!-- Numerical Data Section -->
+                    <h4>Categorical Data</h4>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="education">Education</label>
+                            <select class="form-control" id="education" name="education" required="required">
+                                <!--option value="" disabled selected>Select Education Level</option -->
+                                <option value="Graduation">Graduation</option>
+                                <option>Graduation</option>
+                                <option>PhD</option>
+                                <option>Master</option>
+                                <option>Basic</option>
+                                <option>2n Cycle</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="marital_status">Marital Status</label>
+                            <select class="form-control" id="marital_status" name="marital_status" required="required">
+                                <!--option value="" disabled selected>Select Marital Status</option-->
+                                <option value="Single" >Single</option>
+                                <option>Single</option>
+                                <option>Together</option>
+                                <option>Married</option>
+                                <option>Divorced</option>
+                                <option>Widow</option>
+                                <option>Alone</option>
+                                <option>Absurd</option>
+                                <option>YOLO</option>
+                            </select>
+                        </div>
+                        <!-- Kidhome -->
+                        <div class="col-md-4 mb-3">
+                            <label for="kidhome">Kidhome</label>
+                            <select class="form-control" id="kidhome" name="kidhome" required="required">
+                                <!-- option value="" disabled selected>Kidhome</option -->
+                                <option value="0">0</option>
+                                <option>0</option>
+                                <option>1</option>
+                                <option>2</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Teenhome -->
+                        <div class="col-md-4 mb-3">
+                            <label for="teenhome">Teenhome</label>
+                            <select class="form-control" id="teenhome" name="teenhome" required>
+                                <!--option value="">Select</option-->
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                            </select>
+                        </div>
+
+                        <!-- Binary Categories -->
+                        <div class="col-md-4 mb-3">
+                            <label for="accepted_cmp1">AcceptedCmp1</label>
+                            <select class="form-control" id="accepted_cmp1" name="accepted_cmp1" required>
+                                <!--option value="">Select</option -->
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="accepted_cmp2">AcceptedCmp2</label>
+                            <select class="form-control" id="accepted_cmp2" name="accepted_cmp2" required>
+                                <!--option value="">Select</option-->
+                                <option value="1">1</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Binary Categories -->
+                        <div class="col-md-4 mb-3">
+                            <label for="accepted_cmp3">AcceptedCmp3</label>
+                            <select class="form-control" id="accepted_cmp3" name="accepted_cmp3" required>
+                                <!-- option value="">Select</option -->
+                                <option value="1">1</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="accepted_cmp4">AcceptedCmp4</label>
+                            <select class="form-control" id="accepted_cmp4" name="accepted_cmp4" required>
+                                <!--option value="">Select</option-->
+                                <option value="0">0</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="accepted_cmp5">AcceptedCmp5</label>
+                            <select class="form-control" id="accepted_cmp5" name="accepted_cmp5" required>
+                                <!--option value="">Select</option-->
+                                <option value="1">1</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="accepted_cmp5">Complain</label>
+                            <select class="form-control" id="complain" name="complain" required>
+                                <!--option value="">Select</option-->
+                                <option value="1">1</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="z_cost_contact">Z_CostContact</label>
+                            <select class="form-control" id="z_cost_contact" name="z_cost_contact" required>
+                                <!--option value="">Select</option-->
+                                <option value="1">1</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="z_revenue">Z_Revenue</label>
+                            <select class="form-control" id="z_revenue" name="z_revenue" required>
+                                <!--option value="">Select</option-->
+                                <option value="11">11</option>
+                                <option value="11">11</option>
+                                <option value=" "> </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+                            <label for="response">Response</label>
+                            <select class="form-control" id="response" name="response" required>
+                                <!--option value="">Select</option-->
+                                <option value="1">1</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+                    </div>
+
+                <br>
+                <!-- Numerical Data Section -->
+                <h4>Numerical Data</h4>
+                    <div class="row">
+                        <!-- ID -->
+                        <div class="col-md-4 mb-3">
+                            <label for="i_d">ID</label>
+                            <input type="number" class="form-control" id="i_d" name="i_d"
+                                value="215" required="required">
+                        </div>
+
+
+                        <div class="col-md-4 mb-3">
+                            <label for="dt_customer">Date of Customer</label>
+                            <input type="date" class="form-control" id="dt_customer" name="dt_customer" min="2012-09-04" max="<?= date('Y-m-d'); ?>" value="2022-12-12" required="required">
+                        </div>
+
+                        <!-- NumDealsPurchases -->
+                        <div class="col-md-4 mb-3">
+                            <label for="num_deals_purchases">NumDealsPurchases</label>
+                            <input type="number" class="form-control" id="num_deals_purchases" name="num_deals_purchases"
+                                min="0" max="100" step="1" value="7" required="required">
+                        </div>
+                    </div>
+                    <div class="row">
+
+                        <!-- NumWebPurchases -->
+                        <div class="col-md-4 mb-3">
+                            <label for="num_web_purchases">NumWebPurchases</label>
+                            <input type="number" class="form-control" id="num_web_purchases" name="num_web_purchases"
+                                min="0" max="100" step="1" value="9" required="required">
+                        </div>
+
+                        <!-- NumStorePurchases -->
+                        <div class="col-md-4 mb-3">
+                            <label for="num_store_purchases">NumStorePurchases</label>
+                            <input type="number" class="form-control" id="num_store_purchases" name="num_store_purchases"
+                                    min="0" max="100" step="1" value="2" required="required">
+                        </div>
+
+                        <!-- NumCatalogPurchases -->
+                        <div class="col-md-4 mb-3">
+                            <label for="num_catalog_purchases">NumCatalogPurchases</label>
+                            <input type="number" class="form-control" id="num_catalog_purchases" name="num_catalog_purchases"
+                                    min="0" max="100" step="1" value="0" required="required">
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <!-- NumWebVisitsMonth -->
+                        <div class="col-md-4 mb-3">
+                            <label for="num_web_visits_month">NumWebVisitsMonth</label>
+                            <input type="number" class="form-control" id="num_web_visits_month" name="num_web_visits_month"
+                                    min="0" max="100" step="1" value="45" required="required">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="year_birth">Year of Birth</label>
+                            <input type="number" class="form-control" id="year_birth" name="year_birth"
+                                min="1893" max="1996" value="1980" required="required">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="recency">Recency</label>
+                            <input type="number" class="form-control" id="recency" name="recency"
+                                min="0" max="99" value="42" required="required">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                        <!-- MntWines Input -->
+                            <label for="mnt_wines">MntWines:</label>
+                            <input type="number" class="form-control" id="mnt_wines" name="mnt_wines"
+                                min="0" max="1493" step="1" value="3" step="1" required="required">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <!-- MntFruits Input -->
+                            <label for="mnt_fruits">MntFruits:</label>
+                            <input type="number" class="form-control" id="mnt_fruits" name="mnt_fruits"
+                                min="0" max="194" step="1" value="25" step="1" required="required">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <!-- MntMeatProducts Input -->
+                            <label for="mnt_meat_products">MntMeatProducts:</label>
+                            <input type="number" class="form-control" id="mnt_meat_products" name="mnt_meat_products"
+                                min="0" max="1725" step="1" value="2" required="required">
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+                            <!-- MntMeatProducts Input -->
+                            <label for="mnt_fish_products">MntFishProducts:</label>
+                            <input type="number" class="form-control" id="mnt_fish_products" name="mnt_fish_products"
+                                min="0" max="1725" step="1" value="2" required="required">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <!-- MntMeatProducts Input -->
+                            <label for="mnt_sweet_products">MntSweetProducts:</label>
+                            <input type="number" class="form-control" id="mnt_sweet_products" name="mnt_sweet_products"
+                                min="0" max="1725" step="1" value="25" required="required" >
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <!-- MntMeatProducts Input -->
+                            <label for="mnt_gold_prods">MntGoldProds:</label>
+                            <input type="number" class="form-control" id="mnt_gold_prods" name="mnt_gold_prods"
+                                min="0" max="1725" step="1" value="0" required="required">
+                                <!--min="0" max="1725" step="1" placeholder="0 - 1725" required="required" -->
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+                            <!-- Income Input -->
+                            <label for="income">Income:</label>
+                            <input type="number" class="form-control" id="income" name="income"
+                                min="0" max="100000" step="1" value="25025" required="required">
+                        </div>
+                    </div>
+
+                        <input class="btn btn-primary" type="submit" value="Predict" required />
+                    </div>
+
+                </form>
+            </div>
+            <div class="text-center text-black">
+                <h4 class="display-4 fw-bolder">Customer is Classification in Cluster:  {{context}} </h4>
+            </div>
+        </div>
+    </section>
+    <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+    <script type="text/javascript">
+        $(".input").focus(function(){
+            $(this).parent().addClass("focus");
+        }).blur(function(){
+            if($(this).val() === ''){
+                $(this).parent().removeClass("focus");
+            }
+        })
+    </script>
+  </body>
+</html>

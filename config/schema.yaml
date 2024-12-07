@@ -30,6 +30,37 @@ columns:
   - Z_Revenue: int64
   - Response: int64
 
+webapp_columns:
+  i_d: int
+  year_birth: int
+  education: object
+  marital_status: object
+  income: float
+  kidhome: int
+  teenhome: int
+  dt_customer: object
+  recency: int
+  mnt_wines: int
+  mnt_fruits: int
+  mnt_meat_products: int
+  mnt_fish_products: int
+  mnt_sweet_products: int
+  mnt_gold_prods: int
+  num_deals_purchases: int
+  num_web_purchases: int
+  num_catalog_purchases: int
+  num_store_purchases: int
+  num_web_visits_month: int
+  accepted_cmp1: int
+  accepted_cmp2: int
+  accepted_cmp3: int
+  accepted_cmp4: int
+  accepted_cmp5: int
+  complain: int
+  z_cost_contact: int
+  z_revenue: int
+  response: int
+
 
 categorical_columns:
   - Education
