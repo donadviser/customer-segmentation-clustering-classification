@@ -36,18 +36,18 @@ app.add_middleware(
 class DataForm:
     def __init__(self, request: Request):
         self.request: Request = request
-        self.i_d: Optional[str] = None
+        self.i_d: Optional[int] = None
         self.year_birth: Optional[int] = None
         self.education: Optional[str] = None
         self.marital_status: Optional[str] = None
         self.income: Optional[int] = None
         self.kidhome: Optional[int] = None
-        self.teenhome: Optional[str] = None
+        self.teenhome: Optional[int] = None
         self.dt_customer: Optional[object] = None
-        self.recency: Optional[str] = None
-        self.mnt_wines: Optional[str] = None
-        self.mnt_fruits: Optional[str] = None
-        self.mnt_meat_products: Optional[str] = None
+        self.recency: Optional[int] = None
+        self.mnt_wines: Optional[int] = None
+        self.mnt_fruits: Optional[int] = None
+        self.mnt_meat_products: Optional[int] = None
         self.mnt_fish_products: Optional[int] = None
         self.mnt_sweet_products: Optional[int] = None
         self.mnt_gold_prods: Optional[int] = None
@@ -55,16 +55,16 @@ class DataForm:
         self.num_web_purchases: Optional[int] = None
         self.num_catalog_purchases: Optional[int] = None
         self.num_store_purchases: Optional[int] = None
-        self.num_web_visits_month: Optional[float] = None
-        self.accepted_cmp1: Optional[float] = None
-        self.accepted_cmp2: Optional[float] = None
-        self.accepted_cmp3: Optional[float] = None
-        self.accepted_cmp4: Optional[str] = None
-        self.accepted_cmp5: Optional[str] = None
-        self.complain: Optional[str] = None
-        self.z_cost_contact: Optional[float] = None
-        self.z_revenue: Optional[float] = None
-        self.response: Optional[float] = None
+        self.num_web_visits_month: Optional[int] = None
+        self.accepted_cmp1: Optional[int] = None
+        self.accepted_cmp2: Optional[int] = None
+        self.accepted_cmp3: Optional[int] = None
+        self.accepted_cmp4: Optional[int] = None
+        self.accepted_cmp5: Optional[int] = None
+        self.complain: Optional[int] = None
+        self.z_cost_contact: Optional[int] = None
+        self.z_revenue: Optional[int] = None
+        self.response: Optional[int] = None
 
 
     async def get_marketing_data(self):
@@ -136,50 +136,60 @@ async def predictRouteClient(request: Request):
         form = DataForm(request)
         await form.get_marketing_data()
 
-        input_data = [
-            form.i_d,
-            form.year_birth,
-            form.education,
-            form.marital_status,
-            form.income,
-            form.kidhome,
-            form.teenhome,
-            form.dt_customer,
-            form.recency,
-            form.mnt_wines,
-            form.mnt_fruits,
-            form.mnt_meat_products,
-            form.mnt_fish_products,
-            form.mnt_sweet_products,
-            form.mnt_gold_prods,
-            form.num_deals_purchases,
-            form.num_web_purchases,
-            form.num_catalog_purchases,
-            form.num_store_purchases,
-            form.num_web_visits_month,
-            form.accepted_cmp1,
-            form.accepted_cmp2,
-            form.accepted_cmp3,
-            form.accepted_cmp4,
-            form.accepted_cmp5,
-            form.complain,
-            form.z_cost_contact,
-            form.z_revenue,
-            form.response 
-        ]
+         # Create MarketingData instance from form data
+        #marketing_data = MarketingData.from_form(form)
+        #logging.info("Marketing data populated successfully")
+
+        # Convert MarketingData into DataFrame
+        #cost_df = marketing_data.to_dataframe()
+
+        marketing_data = MarketingData(
+        i_d = form.i_d,
+        year_birth = form.year_birth,
+        education = form.education,
+        marital_status = form.marital_status,
+        income = form.income,
+        kidhome = form.kidhome,
+        teenhome = form.teenhome,
+        dt_customer = form.dt_customer,
+        recency = form.recency,
+        mnt_wines = form.mnt_wines,
+        mnt_fruits = form.mnt_fruits,
+        mnt_meat_products = form.mnt_meat_products,
+        mnt_fish_products = form.mnt_fish_products,
+        mnt_sweet_products = form.mnt_sweet_products,
+        mnt_gold_prods = form.mnt_gold_prods,
+        num_deals_purchases = form.num_deals_purchases,
+        num_web_purchases = form.num_web_purchases,
+        num_catalog_purchases = form.num_catalog_purchases,
+        num_store_purchases = form.num_store_purchases,
+        num_web_visits_month = form.num_web_visits_month,
+        accepted_cmp1 = form.accepted_cmp1,
+        accepted_cmp2 = form.accepted_cmp2,
+        accepted_cmp3 = form.accepted_cmp3,
+        accepted_cmp4 = form.accepted_cmp4,
+        accepted_cmp5 = form.accepted_cmp5,
+        complain = form.complain,
+        z_cost_contact = form.z_cost_contact,
+        z_revenue = form.z_revenue,
+        response = form.response
+        )
+
+
+        cost_df = marketing_data.get_input_data_frame()
+        logging.info(f"Generated cost_df with dtypes:\n{cost_df.dtypes}")
+
+
+
+
+        logging.info("Converted marketing data to DataFrame")
+        logging.info(f"Obtained the cost data: {cost_df.head()}")
+        logging.info(f"cost_df.info(): {cost_df.info()}")
 
         prediction_pipeline = PredictionPipeline()
-
-        logging.info("To get the input data")
-        cost_df = prediction_pipeline.prepare_input_data(input_data=input_data)
-        #logging.info(f"Obtained the input data: {cost_df.head()}")
-        logging.info(f"cost_df['i_d']: {cost_df['i_d']}")
-        logging.info(f"cost_df['education']: {cost_df['education']}")
-        logging.info(f"cost_df['dt_customer']: {cost_df['dt_customer']}")
-        cost_predictor = CostPredictor()
-        cost_value = cost_predictor.predict(X=cost_df)
-        cost_value = int(cost_value[0][0])
-        predicted_result = cost_value
+        cost_value = prediction_pipeline.predict(X=cost_df)
+        #cost_value = int(cost_value[0][0])
+        predicted_result = cost_value[0]
         logging.info(f"cost_value: {cost_value} | predicted_result: {predicted_result}")
 
         return templates.TemplateResponse(

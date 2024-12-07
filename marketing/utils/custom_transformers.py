@@ -262,13 +262,23 @@ class CreateNewFeature(BaseEstimator, TransformerMixin):
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         X_copy = X.copy()
+
+        # Custom date parser to handle multiple formats
+        def parse_date(date_str):
+            for fmt in ("%Y-%m-%d", "%d-%m-%Y"):
+                try:
+                    return pd.to_datetime(date_str, format=fmt)
+                except ValueError:
+                    continue
+            raise ValueError(f"Date format for {date_str} not recognised!")
+
         try:
             X_updated = (X
                          .copy()
                          .assign(
                              education=lambda df: df['education'].map(self.education_map),  # Map education levels
                              marital_status=lambda df: df['marital_status'].map(self.marital_map),  # Map marital status
-                             dt_customer = lambda df: pd.to_datetime(df['dt_customer'], format='%d-%m-%Y'),
+                             dt_customer=lambda df: df['dt_customer'].apply(parse_date),  # Handle multiple date formats,
                              age=lambda df: self.current_year - df['year_birth'],  # Calculate vehicle age
                              children = lambda df: (df['kidhome'] + df['teenhome']).astype('int'), # Calculate number of children
                              family_size = lambda df: (df['marital_status']).astype('int') + df['children'] + 1, # Calculate family size
