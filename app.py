@@ -165,7 +165,7 @@ async def predictRouteClient(request: Request):
             form.complain,
             form.z_cost_contact,
             form.z_revenue,
-            form.response
+            form.response 
         ]
 
         prediction_pipeline = PredictionPipeline()
